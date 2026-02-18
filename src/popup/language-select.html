@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-
 <html>
-	<head>
-		<meta charset="utf-8">
-		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	</head>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 100;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body style="width: 250px;">
+    
+    <div class="sticky-header w3-padding">
+        <h3 id="title" style="margin-top:0; margin-bottom:5px;"></h3>
+        <input id="languageSearch" class="w3-input w3-border w3-round w3-small" type="text" placeholder="Type to search...">
+    </div>
 
-	<body style="width: 200px;">
-		<ul class="w3-ul" id="languageList">
-			<li class="w3-li"><h3 id="title"></h3></li>
-		</ul>
-		<script src="language-select.js"></script>
-	</body>
+    <ul class="w3-ul" id="languageList">
+    </ul>
+
+    <script src="language-select.js"></script>
+</body>
 </html>

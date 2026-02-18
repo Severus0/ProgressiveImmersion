@@ -45,6 +45,10 @@ browser.storage.onChanged.addListener( ( changes, areaName ) => {
 });
 
 function awaitNextWord ( value ) {
+    const freq = value.updateFrequency !== undefined ? value.updateFrequency : 12;
+    if ( freq >= NEVER_UPDATE_FREQUENCY ) {
+        return;
+    }
 	const nextWordTime = value.latestWordTime + ( ( value.updateFrequency !== undefined ? value.updateFrequency : 12 ) * 60 * 60 * 1000 );
 	browser.alarms.create({ when: nextWordTime });
 }

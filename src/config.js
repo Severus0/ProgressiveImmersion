@@ -7,6 +7,7 @@ if ( !browser.action ) {
 const { languages: LANGUAGES } = require( 'google-translate-api-x' );
 
 const DEFAULT_UPDATE_FREQUENCY = 12;
+const NEVER_UPDATE_FREQUENCY = 96.5;
 const DEFAULT_MIN_WORD_LENGTH = 4;
 const DEFAULT_WORDS_TO_SAVE = 5;
 const DEFAULT_FILTER_MAX_SHARE_OF_WORDS = 0.0075;
