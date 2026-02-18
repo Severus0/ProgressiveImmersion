@@ -53,6 +53,13 @@ export async function exportToAnki() {
     // 4. Generate Cards
     if ( origin && target && dictionary[origin] && dictionary[origin][target] ) {
         for ( const [ source, translation ] of Object.entries( dictionary[origin][target] ) ) {
+            
+            // If the source and translation are identical (case-insensitive), skip.
+            // This prevents "through"->"through" cards.
+            if ( source.trim().toLowerCase() === translation.trim().toLowerCase() ) {
+                continue;
+            }
+
             hasWords = true;
             
             const nativeWord = sanitize( source );       // e.g. "Cat"
@@ -64,12 +71,16 @@ export async function exportToAnki() {
     }
 
     // Fallback: Dump everything if specific language pair isn't found
-    // Note: If we fall back here, the Deck Name header above might be inaccurate 
-    // if the dictionary contains mixed languages, but it preserves the data.
     if ( !hasWords ) {
         for ( const org in dictionary ) {
             for ( const tgt in dictionary[org] ) {
                 for ( const [ source, translation ] of Object.entries( dictionary[org][tgt] ) ) {
+                    
+                    // Skip 1:1 matches in fallback loop too
+                    if ( source.trim().toLowerCase() === translation.trim().toLowerCase() ) {
+                        continue;
+                    }
+
                     content += `${sanitize( translation )};${sanitize( source )}\n`;
                 }
             }
@@ -77,18 +88,15 @@ export async function exportToAnki() {
     }
 
     if ( content.trim() === '' ) {
-        console.warn( "No words to export" );
+        console.warn( "No words to export (or all words were filtered out as duplicates)" );
         return;
     }
 
     // 5. Download (Manifest V3 Safe)
-    // We use btoa (Base64) to avoid URL.createObjectURL crashes in Service Workers
-    // unescape(encodeURIComponent) ensures UTF-8 characters (accents, emojis) are preserved
     const base64Content = btoa( unescape( encodeURIComponent( content ) ) );
     const dataUrl = `data:text/plain;charset=utf-8;base64,${base64Content}`;
 
-    // Update filename to include both ISO codes (e.g. "progressive-immersion-en-es.txt")
-    // This prevents file overwrites on the user's computer.
+    // Update filename to include both ISO codes
     const filename = `progressive-immersion-${origin || 'src'}-${target || 'tgt'}.txt`;
 
     await browser.downloads.download({
