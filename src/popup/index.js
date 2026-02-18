@@ -1,5 +1,6 @@
 import {
 	DEFAULT_UPDATE_FREQUENCY,
+    NEVER_UPDATE_FREQUENCY,
 	browser
 } from '../config';
 

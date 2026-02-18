@@ -1,4 +1,4 @@
-import { browser } from '../config';
+import { browser, NEVER_UPDATE_FREQUENCY } from '../config';
 import updateDictionary from './dictionary-handler';
 import { exportToAnki } from './export-anki';
 
