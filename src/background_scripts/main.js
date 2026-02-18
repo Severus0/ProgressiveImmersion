@@ -1,5 +1,6 @@
 import { browser } from '../config';
 import updateDictionary from './dictionary-handler';
+import { exportToAnki } from './export-anki';
 
 browser.storage.local.get( [ 'state', 'latestWordTime', 'updateFrequency', 'origin', 'originNativeName', 'target', 'targetNativeName' ] ).then( value => {
 	if ( value.state === undefined ){
@@ -56,3 +57,10 @@ browser.alarms.onAlarm.addListener( () => {
 		awaitNextWord( value );
 	});
 });
+
+browser.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'EXPORT_ANKI') {
+    exportToAnki();
+  }
+});
+

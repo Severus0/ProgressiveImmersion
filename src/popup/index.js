@@ -89,3 +89,7 @@ document.getElementById( 'exclusionListMode' ).oninput = () => {
 document.getElementById( 'exclusionList' ).addEventListener( 'input', () => {
 	browser.storage.local.set({ exclusionList: document.getElementById( 'exclusionList' ).value.trim().split( '\n' ) });
 });
+
+document.getElementById('exportAnkiBtn')?.addEventListener('click', () => {
+    browser.runtime.sendMessage({ type: 'EXPORT_ANKI' });
+});
