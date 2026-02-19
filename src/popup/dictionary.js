@@ -7,6 +7,14 @@ const [ originIso, targetIso, originName, targetName ] = window.location.hash.sl
 document.getElementById( 'source-title' ).textContent = originName;
 document.getElementById( 'target-title' ).textContent = targetName;
 
+const urlParams = new URLSearchParams( window.location.search );
+const prefillWord = urlParams.get( 'word' );
+
+if ( prefillWord ) {
+    document.getElementById( 'source-word' ).value = prefillWord;
+    document.getElementById( 'translated-word' ).focus();
+}
+
 browser.storage.local.get( 'dictionary' ).then( value => {
 	if ( value.dictionary === undefined ) {
 		value.dictionary = {};
@@ -26,6 +34,10 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 
 	const sourceWordInput = document.getElementById( 'source-word' );
 	const translatedWordInput = document.getElementById( 'translated-word' );
+    if ( prefillWord ) {
+        sourceWordInput.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+        translatedWordInput.focus();
+    }
 	document.getElementById( 'submit-word' ).addEventListener( 'click', async e => {
 		if ( sourceWordInput.value === '' ) {
 			return;
@@ -45,6 +57,7 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		drawTranslation( sourceWord, translatedWordInput.value.toLowerCase() );
 		sourceWordInput.value = '';
 		translatedWordInput.value = '';
+        sourceWordInput.focus();
 	});
 
 	document.addEventListener( 'keypress', ( e ) => {

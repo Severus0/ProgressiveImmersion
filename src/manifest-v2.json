@@ -13,6 +13,7 @@
 		"storage",
 		"downloads",
 		"unlimitedStorage",
+        "contextMenus",
 		"https://translate.google.com/*"
 	],
 	"browser_action": {
