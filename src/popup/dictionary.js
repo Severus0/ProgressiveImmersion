@@ -57,7 +57,12 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		drawTranslation( sourceWord, translatedWordInput.value.toLowerCase() );
 		sourceWordInput.value = '';
 		translatedWordInput.value = '';
-        sourceWordInput.focus();
+
+        if ( prefillWord ) {
+            window.close();
+        } else {
+            sourceWordInput.focus();
+        }
 	});
 
 	document.addEventListener( 'keypress', ( e ) => {
@@ -66,6 +71,10 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 			document.getElementById( 'submit-word' ).click();
 		}
 	});
+
+    document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
+        browser.runtime.sendMessage({ type: 'EXPORT_ANKI' });
+    });
 
 	function drawTranslation ( original, translated ) {
 		const row = dictionary.insertRow( dictionary.rows.length - 1 );

@@ -1,12 +1,10 @@
 import { LANGUAGES, browser } from '../config';
 
-// Header Title Logic
 document.getElementById( 'title' ).innerHTML = ( window.location.hash === '#origin' ) ? 'Source Language' : 'Target Language';
 
 const languageList = document.getElementById( 'languageList' );
 const searchInput = document.getElementById( 'languageSearch' );
 
-// Populate List
 for ( const isoCode in LANGUAGES ) {
     if ( typeof LANGUAGES[isoCode] === 'function' ) {
         continue;
@@ -37,24 +35,20 @@ for ( const isoCode in LANGUAGES ) {
     languageList.appendChild( listItem );
 }
 
-// Search / Filter Logic
-// Using .oninput to match the style found in options/index.js
 searchInput.oninput = () => {
     const filter = searchInput.value.toLowerCase();
     const items = document.getElementsByClassName( 'language-item' );
 
-    for ( let i = 0; i < items.length; i++ ) {
-        // Get the button inside the li
-        const button = items[i].getElementsByTagName( 'button' )[0];
-        const textValue = button.textContent || button.innerText;
+    for ( const item of items ) {
+        const button = item.getElementsByTagName( 'button' )[0];
+        const textValue = button.textContent;
 
         if ( textValue.toLowerCase().indexOf( filter ) > -1 ) {
-            items[i].style.display = '';
+            item.style.display = '';
         } else {
-            items[i].style.display = 'none';
+            item.style.display = 'none';
         }
     }
 };
 
-// Auto-focus the search box
 searchInput.focus();

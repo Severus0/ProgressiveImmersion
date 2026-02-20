@@ -139,10 +139,6 @@ const viewObserver = new IntersectionObserver( ( entries ) => {
 	// the regex in this scope to preven the same regex being called by multiple
 	// insersections causing the `.lastIndex` being written to simulatenously
 
-    // NEW REGEX:
-    // allows for letters, optionally followed by (apostrophe + more letters)
-    // handles both straight (') and curly (’) apostrophes.
-
 	const matchWords = /(?<=^|[\P{L}])(?<![0-9])(\p{L}+(?:['’]\p{L}+)*)(?![0-9])(?=$|\P{L})/gu;
 	// first it checks if the word is preceded by a non-letter or the start
 	// next it checks that its not preceded by a number
@@ -171,15 +167,6 @@ const viewObserver = new IntersectionObserver( ( entries ) => {
 			let matchedArray;
 			while ( ( matchedArray = matchWords.exec( node.textContent ) ) !== null ) {
 				const [ word ] = matchedArray;
-
-                // ACRONYM / CASE SENSITIVITY
-                // ff the word is uppercase and length > 1 (e.g., "US", "NASA"), ignore it.
-                // this prevents "US" (United States) from being treated as "us" (pronoun).
-
-                if ( word.length > 1 && word === word.toUpperCase() ) {
-                    continue;
-                }
-
 				const wordLower = word.toLowerCase();
 
 				if ( word.length >= minWordLength ) {
