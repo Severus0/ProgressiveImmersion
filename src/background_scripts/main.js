@@ -1,6 +1,7 @@
 import { browser, NEVER_UPDATE_FREQUENCY } from '../config'; 
 import updateDictionary from './dictionary-handler'; 
-import { exportToAnki } from './export-anki'; 
+import { exportToAnki } from './export-anki';
+import { importFromAnki } from './import-anki';
 
 browser.storage.local.get( [ 'state', 'latestWordTime', 'updateFrequency', 'origin', 'originNativeName', 'target', 'targetNativeName' ] ).then( value => { 
     if ( value.state === undefined ){ 
@@ -95,8 +96,11 @@ browser.alarms.onAlarm.addListener( () => {
     }); 
 }); 
 
-browser.runtime.onMessage.addListener((msg) => { 
-    if (msg.type === 'EXPORT_ANKI') { 
+browser.runtime.onMessage.addListener( ( msg, sender, sendResponse ) => { 
+    if ( msg.type === 'EXPORT_ANKI' ) { 
         exportToAnki(); 
-    } 
+    } else if ( msg.type === 'IMPORT_ANKI' ) {
+        importFromAnki( msg.text ).then( count => sendResponse( count ) );
+        return true;
+    }
 });

@@ -4,6 +4,8 @@ import translateWord from '../translateWord';
 const dictionary = document.getElementById( 'dictionary' );
 const [ originIso, targetIso, originName, targetName ] = window.location.hash.slice( 1 ).split( '~' );
 
+const importFileInput = document.getElementById( 'anki-import-file' );
+
 document.getElementById( 'source-title' ).textContent = originName;
 document.getElementById( 'target-title' ).textContent = targetName;
 
@@ -74,6 +76,33 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 
     document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
         browser.runtime.sendMessage({ type: 'EXPORT_ANKI' });
+    });
+    
+    document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', () => {
+        importFileInput.click();
+    });
+
+    importFileInput.addEventListener( 'change', ( e ) => {
+        const file = e.target.files[0];
+        if ( !file ) return;
+
+        const reader = new FileReader();
+        reader.onload = async ( event ) => {
+            const text = event.target.result;
+            // Send text to background script for processing
+            const count = await browser.runtime.sendMessage({ type: 'IMPORT_ANKI', text: text });
+            
+            if ( count > 0 ) {
+                alert( `Imported ${count} words.` );
+                // Reload the page to show the new words in the table
+                window.location.reload();
+            } else {
+                alert( 'No valid words found to import.' );
+            }
+        };
+        reader.readAsText( file );
+        
+        e.target.value = '';
     });
 
 	function drawTranslation ( original, translated ) {
