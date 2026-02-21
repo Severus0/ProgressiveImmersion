@@ -10,6 +10,7 @@
 	<body>
 		<div class="w3-bar">
 			<h2 class="w3-bar-item">Progressive Immersion</h2>
+                <button id="settingsButton" class="w3-bar-item w3-button w3-right" style="margin-top: 10px; font-size: small;">Settings</button>
 		</div>
 		<table class="w3-table w3-striped">
 			<tr>
@@ -50,22 +51,7 @@
 					<a class="w3-button" href="dictionary-list.html">[Dictionaries]</a>
 				</td>
 			</tr>
-			<tr id="exclusionListMode">
-					<td class="w3-padding" style="margin-left: 900px;">
-						<label class="check-container">Whitelist:
-							<input id="whitelistCheck" type="radio" name="exclusionListMode" value="whitelist">
-							<span class="checkmark"></span>
-						</label>
-					</td>
-					<td class="w3-padding">
-						<label class="check-container">Blacklist:
-							<input id="blacklistCheck" type="radio" name="exclusionListMode" value="blacklist">
-							<span class="checkmark"></span>
-						</label>
-					</td>
-			</tr>
 		</table>
-		<textarea class="w3-input w3-border w3-light-grey" id="exclusionList" rows="5" placeholder="Put each entry on its own line, include more of the URL to be more specific."></textarea>
         <script src="index.js"></script>
 	</body>
 </html>

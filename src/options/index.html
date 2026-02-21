@@ -29,7 +29,30 @@
 			<input type="number" id="filterMinShareOfWords" name="filterMinShareOfWords" class="browser-style">
 			<input type="button" id="filterMinShareOfWordsReset" class="browser-style" value="Reset"><br>
 
+                <div id="exclusionListMode" style="display: flex; gap: 20px; margin-top: 15px;">
+					    <div class="w3-padding">
+						    <label class="check-container">Whitelist:
+							    <input id="whitelistCheck" type="radio" name="exclusionListMode" value="whitelist">
+							    <span class="checkmark"></span>
+						    </label>
+					    </div>
+					    <div class="w3-padding">
+						    <label class="check-container">Blacklist:
+							    <input id="blacklistCheck" type="radio" name="exclusionListMode" value="blacklist">
+							    <span class="checkmark"></span>
+						    </label>
+					    </div>
+			    </div>
+
+            <br><br>
+            <textarea class="w3-input w3-border w3-light-grey" id="exclusionList" rows="5" placeholder="Put each entry on its own line, include more of the URL to be more specific."></textarea>
 		</form>
+        <br><hr><br>
+        <h3>Data Management</h3>
+        <button id="exportProgress" class="browser-style">Export Progress</button>
+        <button id="importProgress" class="browser-style">Import Progress</button>
+        <input type="file" id="importProgressFile" accept=".json" style="display:none">
+
 		<script src="index.js"></script>
 	</body>
 </html>
