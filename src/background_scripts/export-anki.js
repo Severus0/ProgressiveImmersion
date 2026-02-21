@@ -1,61 +1,63 @@
 import { browser } from '../config';
 
-export async function exportToAnki() {
-    const data = await browser.storage.local.get( [
+export async function exportToAnki( request ) {
+    const value = await browser.storage.local.get( [
         'dictionary',
-        'origin',
-        'target',
         'originNativeName',
         'targetNativeName'
     ] );
 
-    const {
-        dictionary = {},
-        origin,
-        target,
-        originNativeName,
-        targetNativeName
-    } = data;
+    const origin = request?.origin ?? 'en';
+    const target = request?.target ?? 'es';
+    const dictionary = value.dictionary ?? {};
 
-    if ( !origin || !target || !dictionary[origin]?.[target] ) {
+    const sourceLangName = request?.originNativeName ?? value.originNativeName ?? "Source";
+    const targetLangName = request?.targetNativeName ?? value.targetNativeName ?? "Target";
+
+    const deckName = `Progressive Immersion::${sourceLangName} -> ${targetLangName}`;
+
+    let content = '';
+
+    content += `#deck:${deckName}\n`;
+    content += `#notetype:Basic (and reversed card)\n`;
+    content += `#separator:;\n`;
+    content += `#html:true\n`;
+    content += `#tags:ProgressiveImmersion\n`;
+    content += `#columns:Front;Back\n`;
+
+    let hasWords = false;
+
+    if ( dictionary[origin] && dictionary[origin][target] ) {
+        for ( const [ source, translation ] of Object.entries( dictionary[origin][target] ) ) {
+
+            if ( source.trim().toLowerCase() === translation.trim().toLowerCase() ) {
+                continue;
+            }
+
+            hasWords = true;
+            const nativeWord = source.replaceAll( ';', ',' ).replace( /[\r\n]+/g, ' ' );
+            const foreignWord = translation.replaceAll( ';', ',' ).replace( /[\r\n]+/g, ' ' );
+
+            content += `${foreignWord};${nativeWord}\n`;
+        }
+    }
+
+    if ( !hasWords ) {
         return;
     }
 
-    const sourceLang = originNativeName ?? origin;
-    const targetLang = targetNativeName ?? target;
-    const deckName = `Progressive Immersion::${sourceLang} -> ${targetLang}`;
-
-    const headers = [
-        `#deck:${deckName}`,
-        '#notetype:Basic (and reversed card)',
-        '#separator:;',
-        '#html:true',
-        '#tags:ProgressiveImmersion',
-        '#columns:Front;Back'
-    ].join( '\n' );
-
-    const wordEntries = Object.entries( dictionary[origin][target] );
-    
-    const cards = wordEntries
-        .filter( ( [ src, trn ] ) => src.trim().toLowerCase() !== trn.trim().toLowerCase() )
-        .map( ( [ src, trn ] ) => {
-            const cleanSrc = src.replace( /;/g, ',' );
-            const cleanTrn = trn.replace( /;/g, ',' );
-            return `${cleanTrn};${cleanSrc}`;
-        } )
-        .join( '\n' );
-
-    if ( !cards ) {
-        return;
-    }
-
-    const fileContent = `${headers}\n${cards}`;
-
-    const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent( fileContent );
     const filename = `progressive-immersion-${origin}-${target}.txt`;
+    let url;
+
+    if ( typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function' ) {
+        const blob = new Blob( [ content ], { type: 'text/plain;charset=utf-8' } );
+        url = URL.createObjectURL( blob );
+    } else {
+        url = 'data:text/plain;charset=utf-8,' + encodeURIComponent( content );
+    }
 
     await browser.downloads.download({
-        url: dataUrl,
+        url: url,
         filename: filename,
         saveAs: true
     });

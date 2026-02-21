@@ -1,8 +1,9 @@
 import { browser } from '../config';
 
-export async function importFromAnki( text ) {
+export async function importFromAnki( text, request ) {
     const data = await browser.storage.local.get( [ 'dictionary', 'origin', 'target' ] );
-    const { origin, target } = data;
+    const origin = request?.origin ?? data.origin;
+    const target = request?.target ?? data.target;
     const dictionary = data.dictionary ?? {};
 
     if ( !origin || !target ) {

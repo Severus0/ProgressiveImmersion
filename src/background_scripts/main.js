@@ -60,25 +60,32 @@ function awaitNextWord ( value ) {
 } 
 
 function updateContextMenu ( originName, targetName ) {
-    const title = `Add to ${originName} -> ${targetName} dictionary`;
-    
     browser.contextMenus.removeAll().then( () => {
         browser.contextMenus.create({
             id: 'add-word-to-dictionary',
-            title: title,
+            title: `Add to ${originName} -> ${targetName} dictionary`,
+            contexts: [ 'selection' ]
+        });
+        
+        browser.contextMenus.create({
+            id: 'translate-add-word-to-dictionary',
+            title: `Translate and Add to ${originName} -> ${targetName} dictionary`,
             contexts: [ 'selection' ]
         });
     });
 }
 
 browser.contextMenus.onClicked.addListener( ( info, tab ) => {
-    if ( info.menuItemId === 'add-word-to-dictionary' && info.selectionText ) {
+    if ( info.menuItemId === 'add-word-to-dictionary' || info.menuItemId === 'translate-add-word-to-dictionary' ) {
+        if ( !info.selectionText ) return;
+
         browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => {
-            const queryParam = `?word=${encodeURIComponent( info.selectionText.trim() )}`;
+            const word = encodeURIComponent( info.selectionText.trim() );
+            const autoTranslate = info.menuItemId === 'translate-add-word-to-dictionary' ? '&autoTranslate=true' : '';
             const hash = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
             
             browser.windows.create({ 
-                url: `popup/dictionary.html${queryParam}${hash}`,
+                url: `popup/dictionary.html?word=${word}${autoTranslate}${hash}`,
                 type: 'popup',
                 width: 500,
                 height: 600
@@ -98,9 +105,9 @@ browser.alarms.onAlarm.addListener( () => {
 
 browser.runtime.onMessage.addListener( ( msg, sender, sendResponse ) => { 
     if ( msg.type === 'EXPORT_ANKI' ) { 
-        exportToAnki(); 
-    } else if ( msg.type === 'IMPORT_ANKI' ) {
-        importFromAnki( msg.text ).then( count => sendResponse( count ) );
-        return true;
-    }
+        exportToAnki( msg.request ); 
+    } else if ( msg.type === 'IMPORT_ANKI' ) { 
+        importFromAnki( msg.text, msg.request ).then( count => sendResponse( count ) ); 
+        return true; 
+    } 
 });

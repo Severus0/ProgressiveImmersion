@@ -11,6 +11,16 @@ document.getElementById( 'target-title' ).textContent = targetName;
 
 const urlParams = new URLSearchParams( window.location.search );
 const prefillWord = urlParams.get( 'word' );
+const autoTranslate = urlParams.get( 'autoTranslate' ) === 'true';
+
+let isFirefoxPanel = false;
+if ( navigator.userAgent.toLowerCase().includes( 'firefox' ) ) {
+    browser.tabs.getCurrent().then( tab => {
+        if ( !tab ) {
+            isFirefoxPanel = true;
+        }
+    });
+}
 
 if ( prefillWord ) {
     document.getElementById( 'source-word' ).value = prefillWord;
@@ -36,7 +46,18 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 
 	const sourceWordInput = document.getElementById( 'source-word' );
 	const translatedWordInput = document.getElementById( 'translated-word' );
-    if ( prefillWord ) {
+
+    if ( prefillWord && autoTranslate ) {
+        translateWord( prefillWord, originIso, targetIso )
+            .then( translation => {
+                translatedWordInput.value = translation;
+                translatedWordInput.focus();
+            })
+            .catch( () => {
+                // If translation fails, just focus so user can type
+                translatedWordInput.focus();
+            });
+    } else if ( prefillWord ) {
         sourceWordInput.scrollIntoView( { behavior: 'smooth', block: 'center' } );
         translatedWordInput.focus();
     }
@@ -75,10 +96,28 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 	});
 
     document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
-        browser.runtime.sendMessage({ type: 'EXPORT_ANKI' });
+        browser.runtime.sendMessage({ 
+            type: 'EXPORT_ANKI',
+            request: {
+                origin: originIso,
+                target: targetIso,
+                originNativeName: originName,
+                targetNativeName: targetName
+            }
+        });
     });
     
-    document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', () => {
+    document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
+        if ( isFirefoxPanel ) {
+            e.preventDefault();
+            
+            if ( confirm( "Firefox closes the extension when opening files. Open in a new tab to import?" ) ) {
+                browser.tabs.create({ url: window.location.href });
+                window.close();
+            }
+            return;
+        }
+
         importFileInput.click();
     });
 
@@ -90,7 +129,14 @@ browser.storage.local.get( 'dictionary' ).then( value => {
         reader.onload = async ( event ) => {
             const text = event.target.result;
             // Send text to background script for processing
-            const count = await browser.runtime.sendMessage({ type: 'IMPORT_ANKI', text: text });
+                const count = await browser.runtime.sendMessage({ 
+                type: 'IMPORT_ANKI', 
+                text: text,
+                request: {
+                    origin: originIso,
+                    target: targetIso
+                }
+            });
             
             if ( count > 0 ) {
                 alert( `Imported ${count} words.` );
