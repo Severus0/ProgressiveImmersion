@@ -1,6 +1,6 @@
+import { exportToAnki, importFromAnki } from './anki-handler';
 import { browser } from '../config';
 import translateWord from '../translateWord';
-import { exportToAnki, importFromAnki } from './anki-handler';
 
 const dictionary = document.getElementById( 'dictionary' );
 const [ originIso, targetIso, originName, targetName ] = window.location.hash.slice( 1 ).split( '~' );
@@ -97,21 +97,23 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		}
 	});
 
-    document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
-        exportToAnki( originIso, targetIso, originName, targetName );
-    });
+	document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
+		exportToAnki( originIso, targetIso, originName, targetName );
+	});
 
-    document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
-        if ( isFirefoxPanel ) {
-            e.preventDefault();
-            if ( confirm( "Firefox closes the extension when opening files. Open in a new tab to import?" ) ) {
-                browser.tabs.create({ url: window.location.href });
-                window.close();
-            }
-            return;
-        }
-        importFileInput.click();
-    });
+	document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
+		if ( isFirefoxPanel ) {
+			e.preventDefault();
+			if ( confirm( 'Firefox closes the extension when opening files. Open in a new tab to import?' ) ) {
+				browser.tabs.create({ url: window.location.href });
+				window.close();
+			}
+
+			return;
+		}
+
+		importFileInput.click();
+	});
 
 
 	importFileInput.addEventListener( 'change', ( e ) => {
@@ -122,7 +124,7 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		reader.onload = async ( event ) => {
 			const text = event.target.result;
 
-            const count = await importFromAnki( text, originIso, targetIso );
+			const count = await importFromAnki( text, originIso, targetIso );
 
 			if ( count > 0 ) {
 				alert( `Imported ${count} words.` );
