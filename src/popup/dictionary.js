@@ -1,5 +1,6 @@
 import { browser } from '../config';
 import translateWord from '../translateWord';
+import { exportToAnki, importFromAnki } from './anki-handler';
 
 const dictionary = document.getElementById( 'dictionary' );
 const [ originIso, targetIso, originName, targetName ] = window.location.hash.slice( 1 ).split( '~' );
@@ -96,32 +97,22 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		}
 	});
 
-	document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
-		browser.runtime.sendMessage({
-			type: 'EXPORT_ANKI',
-			request: {
-				origin: originIso,
-				target: targetIso,
-				originNativeName: originName,
-				targetNativeName: targetName
-			}
-		});
-	});
+    document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
+        exportToAnki( originIso, targetIso, originName, targetName );
+    });
 
-	document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
-		if ( isFirefoxPanel ) {
-			e.preventDefault();
+    document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
+        if ( isFirefoxPanel ) {
+            e.preventDefault();
+            if ( confirm( "Firefox closes the extension when opening files. Open in a new tab to import?" ) ) {
+                browser.tabs.create({ url: window.location.href });
+                window.close();
+            }
+            return;
+        }
+        importFileInput.click();
+    });
 
-			if ( confirm( 'Firefox closes the extension when opening files. Open in a new tab to import?' ) ) {
-				browser.tabs.create({ url: window.location.href });
-				window.close();
-			}
-
-			return;
-		}
-
-		importFileInput.click();
-	});
 
 	importFileInput.addEventListener( 'change', ( e ) => {
 		const file = e.target.files[0];
@@ -130,15 +121,8 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		const reader = new FileReader();
 		reader.onload = async ( event ) => {
 			const text = event.target.result;
-			// Send text to background script for processing
-			const count = await browser.runtime.sendMessage({
-				type: 'IMPORT_ANKI',
-				text: text,
-				request: {
-					origin: originIso,
-					target: targetIso
-				}
-			});
+
+            const count = await importFromAnki( text, originIso, targetIso );
 
 			if ( count > 0 ) {
 				alert( `Imported ${count} words.` );
@@ -150,7 +134,6 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		};
 
 		reader.readAsText( file );
-
 		e.target.value = '';
 	});
 

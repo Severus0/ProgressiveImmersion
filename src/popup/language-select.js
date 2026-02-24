@@ -19,7 +19,6 @@ for ( const isoCode in LANGUAGES ) {
 
 	const button = document.createElement( 'button' );
 	button.classList.add( 'w3-button' );
-	button.style.width = '100%';
 	button.style.textAlign = 'left';
 
 	button.innerHTML = LANGUAGES[isoCode];
