@@ -84,10 +84,10 @@ browser.contextMenus.onClicked.addListener( ( info, tab ) => {
 		browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => {
 			const word = encodeURIComponent( info.selectionText.trim() );
 			const autoTranslate = info.menuItemId === 'translate-add-word-to-dictionary' ? '&autoTranslate=true' : '';
-			const hash = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
+			const urlFragment = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
 
 			browser.windows.create({
-				url: `popup/dictionary.html?word=${word}${autoTranslate}${hash}`,
+				url: `popup/dictionary.html?word=${word}${autoTranslate}${urlFragment}`,
 				type: 'popup',
 				width: 500,
 				height: 600

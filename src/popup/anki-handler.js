@@ -4,10 +4,7 @@ export async function exportToAnki ( origin, target, originName, targetName ) {
 	const value = await browser.storage.local.get( 'dictionary' );
 	const dictionary = value.dictionary ?? {};
 
-	const srcName = originName || origin;
-	const tgtName = targetName || target;
-
-	const deckName = `Progressive Immersion::${srcName} -> ${tgtName}`;
+	const deckName = `Progressive Immersion::${originName} -> ${targetName}`;
 
 	let content = '';
 	content += `#deck:${deckName}\n`;
