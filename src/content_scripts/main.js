@@ -43,21 +43,24 @@ function checkShouldTranslateNode ( node ) {
 }
 
 browser.storage.local.get( [ 'state', 'dictionary', 'origin', 'target', 'minWordLength', 'exclusionList', 'exclusionListMode' ] ).then( value => {
-	let isExcluded = false;
-
 	value.exclusionListMode = value.exclusionListMode ?? 'blacklist';
+	let enabledForThisPage = value.state;
 
-	if ( value.exclusionList !== undefined ) {
-		isExcluded = value.exclusionList.some( exclusion => {
+	if (value.exclusionList === undefined) {
+		enabledForThisPage = value.exclusionListMode === 'blacklist';
+	} else {
+		const inList = value.exclusionList.some( exclusion => {
 			if ( exclusion === '' ) {
 				return false;
 			}
 
-			return value.exclusionListMode === 'blacklist' ? window.location.href.includes( exclusion ) : !window.location.href.includes( exclusion );
+			return window.location.href.includes( exclusion );
 		});
+
+		enabledForThisPage = value.exclusionListMode === 'whitelist' ? inList : !inList;
 	}
 
-	if ( !value.state || isExcluded ){
+	if ( !enabledForThisPage ){
 		return;
 	}
 
