@@ -138,7 +138,8 @@ const viewObserver = new IntersectionObserver( ( entries ) => {
 	// using the match length
 	// the regex in this scope to preven the same regex being called by multiple
 	// insersections causing the `.lastIndex` being written to simulatenously
-	const matchWords = /(?<=^|[\P{L}])(?<![0-9])\p{L}+(?![0-9])(?=$|\P{L})/gu;
+
+	const matchWords = /(?<=^|[\P{L}])(?<![0-9])(\p{L}+(?:['’]\p{L}+)*)(?![0-9])(?=$|\P{L})/gu;
 	// first it checks if the word is preceded by a non-letter or the start
 	// next it checks that its not preceded by a number
 	// next it checks for 1 or more unicode letters
@@ -166,8 +167,8 @@ const viewObserver = new IntersectionObserver( ( entries ) => {
 			let matchedArray;
 			while ( ( matchedArray = matchWords.exec( node.textContent ) ) !== null ) {
 				const [ word ] = matchedArray;
-
 				const wordLower = word.toLowerCase();
+
 				if ( word.length >= minWordLength ) {
 					countWord( wordLower );
 				}

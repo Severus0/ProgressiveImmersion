@@ -1,7 +1,12 @@
 import {
 	DEFAULT_UPDATE_FREQUENCY,
+	NEVER_UPDATE_FREQUENCY,
 	browser
 } from '../config';
+
+document.getElementById( 'settingsButton' ).addEventListener( 'click', () => {
+	browser.runtime.openOptionsPage();
+});
 
 // ON/OFF
 
@@ -37,8 +42,14 @@ document.getElementById( 'onSwitch' ).addEventListener( 'click', () => {
 // Update Slider
 
 browser.storage.local.get( 'updateFrequency' ).then( ( value ) => {
-	document.getElementById( 'updateSlider' ).value = ( value.updateFrequency !== undefined ) ? value.updateFrequency : DEFAULT_UPDATE_FREQUENCY;
-	document.getElementById( 'updateSliderText' ).innerHTML = `New words every ${document.getElementById( 'updateSlider' ).value} hours`;
+	const freq = ( value.updateFrequency !== undefined ) ? value.updateFrequency : DEFAULT_UPDATE_FREQUENCY;
+	document.getElementById( 'updateSlider' ).value = freq;
+	if ( freq >= NEVER_UPDATE_FREQUENCY ) {
+		document.getElementById( 'updateSliderText' ).innerHTML = 'New words: Never';
+	} else {
+		document.getElementById( 'updateSliderText' ).innerHTML = `New words every ${freq} hours`;
+	}
+
 	if ( value.updateFrequency === undefined ) {
 		browser.storage.local.set({ updateFrequency: DEFAULT_UPDATE_FREQUENCY });
 	}
@@ -46,7 +57,12 @@ browser.storage.local.get( 'updateFrequency' ).then( ( value ) => {
 
 document.getElementById( 'updateSlider' ).oninput = () => {
 	const updateFrequency = parseFloat( document.getElementById( 'updateSlider' ).value );
-	document.getElementById( 'updateSliderText' ).innerHTML = `New words every ${updateFrequency.toPrecision( 3 )} hours`;
+	if ( updateFrequency >= NEVER_UPDATE_FREQUENCY ) {
+		document.getElementById( 'updateSliderText' ).innerHTML = 'New words: Never';
+	} else {
+		document.getElementById( 'updateSliderText' ).innerHTML = `New words every ${updateFrequency.toPrecision( 3 )} hours`;
+	}
+
 	browser.storage.local.set({ updateFrequency: updateFrequency });
 };
 
@@ -60,7 +76,6 @@ browser.storage.local.get( 'originNativeName' ).then( ( value ) => {
 browser.storage.local.get( 'targetNativeName' ).then( ( value ) => {
 	document.getElementById( 'targetButton' ).innerHTML = value.targetNativeName;
 });
-
 
 // Exclusion List
 

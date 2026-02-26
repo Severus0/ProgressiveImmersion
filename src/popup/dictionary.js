@@ -1,11 +1,32 @@
+import { exportToAnki, importFromAnki } from './anki-handler';
 import { browser } from '../config';
 import translateWord from '../translateWord';
 
 const dictionary = document.getElementById( 'dictionary' );
 const [ originIso, targetIso, originName, targetName ] = window.location.hash.slice( 1 ).split( '~' );
 
+const importFileInput = document.getElementById( 'anki-import-file' );
+
 document.getElementById( 'source-title' ).textContent = originName;
 document.getElementById( 'target-title' ).textContent = targetName;
+
+const urlParams = new URLSearchParams( window.location.search );
+const prefillWord = urlParams.get( 'word' );
+const autoTranslate = urlParams.get( 'autoTranslate' ) === 'true';
+
+let isFirefoxPanel = false;
+if ( navigator.userAgent.toLowerCase().includes( 'firefox' ) ) {
+	browser.tabs.getCurrent().then( tab => {
+		if ( !tab ) {
+			isFirefoxPanel = true;
+		}
+	});
+}
+
+if ( prefillWord ) {
+	document.getElementById( 'source-word' ).value = prefillWord;
+	document.getElementById( 'translated-word' ).focus();
+}
 
 browser.storage.local.get( 'dictionary' ).then( value => {
 	if ( value.dictionary === undefined ) {
@@ -26,6 +47,22 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 
 	const sourceWordInput = document.getElementById( 'source-word' );
 	const translatedWordInput = document.getElementById( 'translated-word' );
+
+	if ( prefillWord && autoTranslate ) {
+		translateWord( prefillWord, originIso, targetIso )
+			.then( translation => {
+				translatedWordInput.value = translation;
+				translatedWordInput.focus();
+			})
+			.catch( () => {
+				// If translation fails, just focus so user can type
+				translatedWordInput.focus();
+			});
+	} else if ( prefillWord ) {
+		sourceWordInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		translatedWordInput.focus();
+	}
+
 	document.getElementById( 'submit-word' ).addEventListener( 'click', async e => {
 		if ( sourceWordInput.value === '' ) {
 			return;
@@ -45,6 +82,12 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		drawTranslation( sourceWord, translatedWordInput.value.toLowerCase() );
 		sourceWordInput.value = '';
 		translatedWordInput.value = '';
+
+		if ( prefillWord ) {
+			window.close();
+		} else {
+			sourceWordInput.focus();
+		}
 	});
 
 	document.addEventListener( 'keypress', ( e ) => {
@@ -52,6 +95,59 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 			e.preventDefault();
 			document.getElementById( 'submit-word' ).click();
 		}
+	});
+
+	function firefoxFilePickerFix ( e ) {
+		if ( !isFirefoxPanel ) {
+			return false;
+		}
+
+		e.preventDefault();
+		alert( 'Firefox closes the extension when using the file picker, so a new tab must be created.' );
+		browser.tabs.create({ url: window.location.href });
+		window.close();
+
+		return true;
+	}
+
+	document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', ( e ) => {
+		if ( firefoxFilePickerFix( e ) ) {
+			return;
+		}
+
+		exportToAnki( originIso, targetIso, originName, targetName );
+	});
+
+	document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
+		if ( firefoxFilePickerFix( e ) ) {
+			return;
+		}
+
+		importFileInput.click();
+	});
+
+
+	importFileInput.addEventListener( 'change', ( e ) => {
+		const file = e.target.files[0];
+		if ( !file ) { return; }
+
+		const reader = new FileReader();
+		reader.onload = async ( event ) => {
+			const text = event.target.result;
+
+			const count = await importFromAnki( text, originIso, targetIso );
+
+			if ( count > 0 ) {
+				alert( `Imported ${count} words.` );
+				// Reload the page to show the new words in the table
+				window.location.reload();
+			} else {
+				alert( 'No valid words found to import.' );
+			}
+		};
+
+		reader.readAsText( file );
+		e.target.value = '';
 	});
 
 	function drawTranslation ( original, translated ) {
