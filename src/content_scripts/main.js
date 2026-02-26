@@ -44,7 +44,7 @@ function checkShouldTranslateNode ( node ) {
 
 browser.storage.local.get( [ 'state', 'dictionary', 'origin', 'target', 'minWordLength', 'exclusionList', 'exclusionListMode' ] ).then( value => {
 	value.exclusionListMode = value.exclusionListMode ?? 'blacklist';
-	let enabledForThisPage = value.state;
+	let enabledForThisPage = true;
 
 	if (value.exclusionList === undefined) {
 		enabledForThisPage = value.exclusionListMode === 'blacklist';
@@ -60,7 +60,7 @@ browser.storage.local.get( [ 'state', 'dictionary', 'origin', 'target', 'minWord
 		enabledForThisPage = value.exclusionListMode === 'whitelist' ? inList : !inList;
 	}
 
-	if ( !enabledForThisPage ){
+	if ( !enabledForThisPage || !value.state){
 		return;
 	}
 
