@@ -61,37 +61,38 @@ function awaitNextWord ( value ) {
 	browser.alarms.create({ when: nextWordTime });
 }
 
-function updateContextMenu ( originName, targetName ) { 
-    browser.contextMenus.removeAll().then( () => { 
-        browser.contextMenus.create({ 
-            id: 'translate-add-word-to-dictionary', 
-            title: `Translate and Add to ${originName} -> ${targetName} dictionary`, 
-            contexts: [ 'selection' ] 
-        }); 
-    }); 
-} 
+function updateContextMenu ( originName, targetName ) {
+	browser.contextMenus.removeAll().then( () => {
+		browser.contextMenus.create({
+			id: 'translate-add-word-to-dictionary',
+			title: `Translate and Add to ${originName} -> ${targetName} dictionary`,
+			contexts: [ 'selection' ]
+		});
+	});
+}
 
-browser.contextMenus.onClicked.addListener( ( info, tab ) => { 
-    if ( info.menuItemId === 'translate-add-word-to-dictionary' ) { 
-        if ( !info.selectionText ) { 
-            return; 
-        } 
-        browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => { 
-            const word = encodeURIComponent( info.selectionText.trim() ); 
-            
-            const autoTranslate = '&autoTranslate=true'; 
-            
-            const urlFragment = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`; 
-            
-            browser.windows.create({ 
-                url: `popup/dictionary.html?word=${word}${autoTranslate}${urlFragment}`, 
-                type: 'popup', 
-                width: 500, 
-                height: 600 
-            }); 
-        }); 
-    } 
-}); 
+browser.contextMenus.onClicked.addListener( ( info, tab ) => {
+	if ( info.menuItemId === 'translate-add-word-to-dictionary' ) {
+		if ( !info.selectionText ) {
+			return;
+		}
+
+		browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => {
+			const word = encodeURIComponent( info.selectionText.trim() );
+
+			const autoTranslate = '&autoTranslate=true';
+
+			const urlFragment = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
+
+			browser.windows.create({
+				url: `popup/dictionary.html?word=${word}${autoTranslate}${urlFragment}`,
+				type: 'popup',
+				width: 500,
+				height: 600
+			});
+		});
+	}
+});
 
 browser.alarms.onAlarm.addListener( () => {
 	browser.storage.local.get( [ 'updateFrequency' ] ).then( value => {
