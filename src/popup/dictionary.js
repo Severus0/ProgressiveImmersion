@@ -97,18 +97,29 @@ browser.storage.local.get( 'dictionary' ).then( value => {
 		}
 	});
 
-	document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', () => {
+	function firefoxFilePickerFix ( e ) {
+		if ( !isFirefoxPanel ) {
+			return false;
+		}
+
+		e.preventDefault();
+		alert( 'Firefox closes the extension when using the file picker, so a new tab must be created.' );
+		browser.tabs.create({ url: window.location.href });
+		window.close();
+
+		return true;
+	}
+
+	document.getElementById( 'exportAnkiButton' )?.addEventListener( 'click', ( e ) => {
+		if ( firefoxFilePickerFix( e ) ) {
+			return;
+		}
+
 		exportToAnki( originIso, targetIso, originName, targetName );
 	});
 
 	document.getElementById( 'importAnkiButton' )?.addEventListener( 'click', ( e ) => {
-		if ( isFirefoxPanel ) {
-			e.preventDefault();
-			if ( confirm( 'Firefox closes the extension when opening files. Open in a new tab to import?' ) ) {
-				browser.tabs.create({ url: window.location.href });
-				window.close();
-			}
-
+		if ( firefoxFilePickerFix( e ) ) {
 			return;
 		}
 

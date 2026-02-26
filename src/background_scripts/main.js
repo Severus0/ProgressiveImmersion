@@ -78,22 +78,26 @@ function updateContextMenu ( originName, targetName ) {
 }
 
 browser.contextMenus.onClicked.addListener( ( info, tab ) => {
-	if ( info.menuItemId === 'add-word-to-dictionary' || info.menuItemId === 'translate-add-word-to-dictionary' ) {
-		if ( !info.selectionText ) { return; }
-
-		browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => {
-			const word = encodeURIComponent( info.selectionText.trim() );
-			const autoTranslate = info.menuItemId === 'translate-add-word-to-dictionary' ? '&autoTranslate=true' : '';
-			const urlFragment = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
-
-			browser.windows.create({
-				url: `popup/dictionary.html?word=${word}${autoTranslate}${urlFragment}`,
-				type: 'popup',
-				width: 500,
-				height: 600
-			});
-		});
+	if (
+		info.menuItemId !== 'add-word-to-dictionary' &&
+		info.menuItemId !== 'translate-add-word-to-dictionary' ||
+		!info.selectionText
+	) {
+		return;
 	}
+
+	browser.storage.local.get( [ 'origin', 'target', 'originNativeName', 'targetNativeName' ] ).then( value => {
+		const word = encodeURIComponent( info.selectionText.trim() );
+		const autoTranslate = info.menuItemId === 'translate-add-word-to-dictionary' ? '&autoTranslate=true' : '';
+		const urlFragment = `#${value.origin}~${value.target}~${value.originNativeName}~${value.targetNativeName}`;
+
+		browser.windows.create({
+			url: `popup/dictionary.html?word=${word}${autoTranslate}${urlFragment}`,
+			type: 'popup',
+			width: 500,
+			height: 600
+		});
+	});
 });
 
 browser.alarms.onAlarm.addListener( () => {

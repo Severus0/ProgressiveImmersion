@@ -50,10 +50,6 @@ export async function importFromAnki ( text, origin, target ) {
 	const data = await browser.storage.local.get( 'dictionary' );
 	const dictionary = data.dictionary ?? {};
 
-	if ( !origin || !target ) {
-		return 0;
-	}
-
 	dictionary[origin] ??= {};
 	dictionary[origin][target] ??= {};
 
