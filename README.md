@@ -54,9 +54,9 @@ npm run serve-ext-v[2 or 3]
 And for reviewers:
 
 ```
-OS: Windows 11 23H2
-Node: v20.5.1
-npm: 9.8.0
+OS: Windows 11 25H2
+Node: v23.8.0
+npm: 10.9.2
 ```
 
 ## Will not fix issues:
