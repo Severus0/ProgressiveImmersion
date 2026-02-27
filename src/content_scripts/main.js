@@ -46,7 +46,7 @@ browser.storage.local.get( [ 'state', 'dictionary', 'origin', 'target', 'minWord
 	value.exclusionListMode = value.exclusionListMode ?? 'blacklist';
 	let enabledForThisPage = true;
 
-	if (value.exclusionList === undefined) {
+	if ( value.exclusionList === undefined ) {
 		enabledForThisPage = value.exclusionListMode === 'blacklist';
 	} else {
 		const inList = value.exclusionList.some( exclusion => {
@@ -60,7 +60,7 @@ browser.storage.local.get( [ 'state', 'dictionary', 'origin', 'target', 'minWord
 		enabledForThisPage = value.exclusionListMode === 'whitelist' ? inList : !inList;
 	}
 
-	if ( !enabledForThisPage || !value.state){
+	if ( !enabledForThisPage || !value.state ){
 		return;
 	}
 

@@ -50,6 +50,7 @@ function translate ( wordLower, matchedArray, textNode, intersectionTarget, dict
 	wordElement.setAttribute( 'data-translated-word', translated );
 
 	wordElement.innerHTML = translated;
+	wordElement.style.borderBottom = '1px dotted currentColor';
 	wordElement.addEventListener( 'mouseover', e => {
 		e.target.innerHTML = e.target.getAttribute( 'data-original-word' ) ?? '';
 	});
